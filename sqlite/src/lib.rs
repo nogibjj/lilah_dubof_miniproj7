@@ -72,10 +72,32 @@ pub fn load_data_from_csv(
 
         conn.execute(&insert_query, params![id, name, age])?;
     }
-
     println!(
         "Data loaded successfully from '{}' into table '{}'.",
         file_path, table_name
     );
+    Ok(())
+}
+pub fn update_table(
+    conn: &Connection,
+    table_name: &str,
+    set_clause: &str,
+    condition: &str,
+) -> Result<()> {
+    // Construct the SQL UPDATE query using the provided table name, set clause, and condition
+    let update_query = format!(
+        "UPDATE {} SET {} WHERE {};",
+        table_name, set_clause, condition
+    );
+    
+    // Execute the update query
+    let affected_rows = conn.execute(&update_query, [])?;
+    
+    // Output the number of rows updated
+    println!(
+        "Successfully updated {} row(s) in table '{}'.",
+        affected_rows, table_name
+    );
+    
     Ok(())
 }
