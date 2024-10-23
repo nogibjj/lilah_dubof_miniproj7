@@ -1,16 +1,19 @@
 use csv::ReaderBuilder; //for loading from csv
-use rusqlite::{params, Connection, Result}; 
+use rusqlite::{params, Connection, Result};
 use std::error::Error;
 use std::fs::File; //for loading csv //for capturing errors from loading
-                                     // Here we will have a function for each of the commands
+                   // Here we will have a function for each of the commands
 
 // Create a table
 pub fn create_table(conn: &Connection, table_name: &str) -> Result<()> {
     let create_query = format!(
         "CREATE TABLE IF NOT EXISTS {} (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            age INTEGER NOT NULL
+            year INTEGER NOT NULL,
+            less_than_hs INTEGER NOT NULL,
+            high_school INTEGER NOT NULL,
+            some_college INTEGER NOT NULL,
+            bachelors_degree INTEGER NOT NULL,
+            advanced_degree INTEGER NOT NULL,
         )",
         table_name
     );
@@ -27,16 +30,26 @@ pub fn query_exec(conn: &Connection, query_string: &str) -> Result<()> {
     // Use query_map to handle multiple rows
     let rows = stmt.query_map([], |row| {
         // Assuming the `users` table has an `id` and `name` column
-        let id: i32 = row.get(0)?;
-        let name: String = row.get(1)?;
-        let age: i32 = row.get(2)?;
-        Ok((id, name,age))
+        let year: i32 = row.get(0)?;
+        let less_than_hs: i32 = row.get(1)?;
+        let high_school: i32 = row.get(2)?;
+        let some_college: i32 = row.get(3)?;
+        let bachelors_degree: i32 = row.get(4)?;
+        let advanced_degree: i32 = row.get(5)?;
+        Ok((
+            year,
+            less_than_hs,
+            high_school,
+            some_college,
+            bachelors_degree,
+            advanced_degree,
+        ))
     })?;
 
     // Iterate over the rows and print the results
     for row in rows {
-        let (id, name,age) = row?;
-        println!("ID: {}, Name: {}, Age: {}", id, name, age);
+        let (year, less_than_hs, high_school, some_college, bachelors_degree, advanced_degree) = row?;
+        println!("year: {}, Less than HS: {}, High School: {}, Some College: {}, Bachelors Degree: {}, Advanced Degree: {}", year, less_than_hs, high_school, some_college, bachelors_degree, advanced_degree);
     }
 
     Ok(())
@@ -55,22 +68,36 @@ pub fn load_data_from_csv(
     conn: &Connection,
     table_name: &str,
     file_path: &str,
-) -> Result<(), Box<dyn Error>> { //Box<dyn Error> is a trait object that can represent any error type
+) -> Result<(), Box<dyn Error>> {
+    //Box<dyn Error> is a trait object that can represent any error type
     let file = File::open(file_path)?;
     let mut rdr = ReaderBuilder::new().from_reader(file);
 
     let insert_query = format!(
-        "INSERT INTO {} (id, name, age) VALUES (?, ?, ?)",
+        "INSERT INTO {} (year, less_than_hs, high_school, some_college, bachelors_degree, advanced_degree) VALUES (?, ?, ?, ?, ?, ?)",
         table_name
     );
     //this is a loop that expects a specific schema, you will need to change this if you have a different schema
     for result in rdr.records() {
         let record = result?;
-        let id: i32 = record[0].parse()?; //.parse() is a method that converts a string into a number
-        let name: &str = &record[1];
-        let age: i32 = record[2].parse()?;
+        let year: i32 = record[0].parse()?; //.parse() is a method that converts a string into a number
+        let less_than_hs: i32 = record[1].parse()?;
+        let high_school: i32 = record[2].parse()?;
+        let some_college: i32 = record[3].parse()?;
+        let bachelors_degree: i32 = record[4].parse()?;
+        let advanced_degree: i32 = record[5].parse()?;
 
-        conn.execute(&insert_query, params![id, name, age])?;
+        conn.execute(
+            &insert_query,
+            params![
+                year,
+                less_than_hs,
+                high_school,
+                some_college,
+                bachelors_degree,
+                advanced_degree
+            ],
+        )?;
     }
     println!(
         "Data loaded successfully from '{}' into table '{}'.",
@@ -89,15 +116,15 @@ pub fn update_table(
         "UPDATE {} SET {} WHERE {};",
         table_name, set_clause, condition
     );
-    
+
     // Execute the update query
     let affected_rows = conn.execute(&update_query, [])?;
-    
+
     // Output the number of rows updated
     println!(
         "Successfully updated {} row(s) in table '{}'.",
         affected_rows, table_name
     );
-    
+
     Ok(())
 }
