@@ -41,6 +41,9 @@ enum Commands {
         table_name: String,
         file_path: String,
     },
+    ///Pass a table name, a set clause, and a condition to update a row inthe table
+    /// sqlite -u table_name set_clause condition
+    #[command(alias = "u", short_flag = 'u')]
     Update {
         table_name: String,
         set_clause: String,

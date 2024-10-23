@@ -8,12 +8,12 @@ use std::fs::File; //for loading csv //for capturing errors from loading
 pub fn create_table(conn: &Connection, table_name: &str) -> Result<()> {
     let create_query = format!(
         "CREATE TABLE IF NOT EXISTS {} (
-            year INTEGER NOT NULL,
+            year INTEGER PRIMARY KEY,
             less_than_hs INTEGER NOT NULL,
             high_school INTEGER NOT NULL,
             some_college INTEGER NOT NULL,
             bachelors_degree INTEGER NOT NULL,
-            advanced_degree INTEGER NOT NULL,
+            advanced_degree INTEGER NOT NULL
         )",
         table_name
     );
@@ -48,7 +48,8 @@ pub fn query_exec(conn: &Connection, query_string: &str) -> Result<()> {
 
     // Iterate over the rows and print the results
     for row in rows {
-        let (year, less_than_hs, high_school, some_college, bachelors_degree, advanced_degree) = row?;
+        let (year, less_than_hs, high_school, some_college, bachelors_degree, advanced_degree) =
+            row?;
         println!("year: {}, Less than HS: {}, High School: {}, Some College: {}, Bachelors Degree: {}, Advanced Degree: {}", year, less_than_hs, high_school, some_college, bachelors_degree, advanced_degree);
     }
 
@@ -70,7 +71,7 @@ pub fn load_data_from_csv(
     file_path: &str,
 ) -> Result<(), Box<dyn Error>> {
     //Box<dyn Error> is a trait object that can represent any error type
-    let file = File::open(file_path)?;
+    let file = File::open(file_path).expect("failed to open the file path");
     let mut rdr = ReaderBuilder::new().from_reader(file);
 
     let insert_query = format!(
@@ -79,14 +80,26 @@ pub fn load_data_from_csv(
     );
     //this is a loop that expects a specific schema, you will need to change this if you have a different schema
     for result in rdr.records() {
-        let record = result?;
-        let year: i32 = record[0].parse()?; //.parse() is a method that converts a string into a number
-        let less_than_hs: i32 = record[1].parse()?;
-        let high_school: i32 = record[2].parse()?;
-        let some_college: i32 = record[3].parse()?;
-        let bachelors_degree: i32 = record[4].parse()?;
-        let advanced_degree: i32 = record[5].parse()?;
-
+        let record = result.expect("failed to parse a record");
+        //let year: i32 = record[0].trim().parse().expect("failed to parse year"); //.parse() is a method that converts a string into a number
+        let year_str = record[0].trim();
+        let year: i32 = match year_str.parse() {
+            Ok(year) => year,
+            Err(_) => {
+                println!("Failed to parse year '{}'", year_str);
+                // You can either return an error, panic, or set a default value
+                // For example, you can set a default value like this:
+                0
+            }
+        };
+        println!("year: {}", year);
+        let less_than_hs: f32 = record[1].trim().parse()?;
+        let high_school: f32 = record[2].trim().parse()?;
+        let some_college: f32 = record[3].trim().parse()?;
+        let bachelors_degree: f32 = record[4].trim().parse()?;
+        let advanced_degree: f32 = record[5].trim().parse().expect("failed to parse advanced degree");
+        println!("year: {}, Less than HS: {}, High School: {}, Some College: {}, Bachelors Degree: {}, Advanced Degree: {}", year, less_than_hs, high_school, some_college, bachelors_degree, advanced_degree);
+        
         conn.execute(
             &insert_query,
             params![
@@ -97,7 +110,7 @@ pub fn load_data_from_csv(
                 bachelors_degree,
                 advanced_degree
             ],
-        )?;
+        ).expect("failed to execute data into db table");
     }
     println!(
         "Data loaded successfully from '{}' into table '{}'.",
