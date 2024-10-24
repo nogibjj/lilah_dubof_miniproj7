@@ -122,6 +122,7 @@ pub fn load_data_from_csv(
     );
     Ok(())
 }
+
 pub fn update_table(
     conn: &Connection,
     table_name: &str,
@@ -144,4 +145,55 @@ pub fn update_table(
     );
 
     Ok(())
+}
+
+// TEST FUNCTIONS
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rusqlite::{Connection, Result};
+    use std::io::Write;
+
+    #[test]
+    fn test_create_table() -> Result<()> {
+        let conn = Connection::open_in_memory()?;
+        create_table(&conn, "test_table")?;
+        let mut stmt = conn
+            .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='test_table'")?;
+        let mut rows = stmt.query([])?;
+        assert!(rows.next().unwrap().is_some());
+        Ok(())
+    }
+
+    #[test]
+    fn test_query_exec() -> Result<(), Box<dyn Error>> {
+        let conn = Connection::open_in_memory()?;
+        create_table(&conn, "test_table")?;
+        load_data_from_csv(&conn, "test_table", "../data/test_data.csv")?;
+
+        let query_string = "SELECT * FROM test_table";
+        query_exec(&conn, query_string)?;
+
+        // Check that the query returned some rows
+        let mut stmt = conn.prepare("SELECT COUNT(*) FROM test_table")?;
+        let mut rows = stmt.query([])?;
+        let count: i32 = rows.next().unwrap().unwrap().get(0).unwrap();
+        assert!(count > 0);
+
+        Ok(())
+    }
+
+    // Test function to verify the `drop_table` behavior
+    #[test]
+    fn test_drop_table() -> Result<()> {
+        let conn = Connection::open_in_memory()?;
+        create_table(&conn, "test_table")?;
+        drop_table(&conn, "test_table")?;
+        let mut stmt = conn
+            .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='test_table'")?;
+        let mut rows = stmt.query([])?;
+        assert!(rows.next().unwrap().is_none());
+        Ok(())
+    }
 }

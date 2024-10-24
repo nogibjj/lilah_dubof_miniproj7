@@ -73,3 +73,8 @@
 ---
 #### **DELETE**
 ![alt text](readme_screenshots/delete_image.png)
+
+---
+### Tests
+##### As I am still naviagting Rust as a language, I've made three simple test functions to ensure that the project is able to create and connect to a database, generate a table, and drop a table. These tests all passed, and I will work on incorporating further testing as I become accustomed to working in Rust
+![alt text](readme_screenshots/test_image.png)
