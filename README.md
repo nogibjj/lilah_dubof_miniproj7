@@ -41,6 +41,7 @@
 - [x] Cargo build
 - [x] Cargo build --release
     - This cargo build --release command generates a binary file within the project/target/release folder. This file ultimately is what gets returned as a binary artifact when running the GitHub actions.
+![alt text](<../readme_screenshots/Screenshot 2024-10-23 at 1.45.17 PM.png>)
 ---
 ### CLI Functionality and Directions for Use
 ##### The main.rs file calls a series of functions in the lib.rs file - these functions follow the standard SQL format of CRUD (Create, Read, Update, and Delete) functions. At the top of the main function, a series of flags are defined for easy integration into the terminal, shown here:
@@ -55,4 +56,9 @@
 ##### After running that command in the terminal, the flags can now be used. By running the help command, a list of available functions/flags will appear in the terminal, as shown in the image above. These flags allow the user to complete standard CRUD operations from the terminal, so long as the data/schema are updated accordingly.
 ---
 ### The Data and Goal for this Example
-##### The data being used in this example is a free kaggle dataset containing information about the average hourly wage for different levels of education, and then separated by demographics. For simplicity, this project simply compares the overall average wage of different education levels, over a period of roughly 50 years. The Create function makes a connection to a local database (my_database.db), and generates a table, with a name that the user inputs with the -c flag. Similarly, using the -d flag will delete the table from the database. To load data into the table, the -l flag is used, along with two parameters: the table name used for -c, and the relative file path. Finally, the update function is called with -u, and provides a way to update specific values of the wages, based on the year given. The update function can be adjusted or expanded based on the user's needs. 
+#####    The data being used in this example is a free kaggle dataset containing information about the average hourly wage for different levels of education, and then separated by demographics. For simplicity, this project simply compares the overall average wage of different education levels, over a period of roughly 50 years.
+#####   The Create function makes a connection to a local database (my_database.db), and generates a table, with a name that the user inputs with the -c flag. Similarly, using the -d flag will delete the table from the database. To load data into the table, the -l flag is used, along with two parameters: the table name used for -c, and the relative file path. Finally, the update function is called with -u, and provides a way to update specific values of the wages, based on the year given. The update function can be adjusted or expanded based on the user's needs.
+![alt text](<../readme_screenshots/Screenshot 2024-10-23 at 2.04.37 PM.png>)
+![alt text](<../readme_screenshots/Screenshot 2024-10-23 at 9.56.14 PM.png>)
+![alt text](<../readme_screenshots/Screenshot 2024-10-23 at 8.21.01 PM.png>)
+![alt text](<../readme_screenshots/Screenshot 2024-10-23 at 9.58.05 PM.png>)
