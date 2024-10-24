@@ -97,9 +97,12 @@ pub fn load_data_from_csv(
         let high_school: f32 = record[2].trim().parse()?;
         let some_college: f32 = record[3].trim().parse()?;
         let bachelors_degree: f32 = record[4].trim().parse()?;
-        let advanced_degree: f32 = record[5].trim().parse().expect("failed to parse advanced degree");
+        let advanced_degree: f32 = record[5]
+            .trim()
+            .parse()
+            .expect("failed to parse advanced degree");
         println!("year: {}, Less than HS: {}, High School: {}, Some College: {}, Bachelors Degree: {}, Advanced Degree: {}", year, less_than_hs, high_school, some_college, bachelors_degree, advanced_degree);
-        
+
         conn.execute(
             &insert_query,
             params![
@@ -110,7 +113,8 @@ pub fn load_data_from_csv(
                 bachelors_degree,
                 advanced_degree
             ],
-        ).expect("failed to execute data into db table");
+        )
+        .expect("failed to execute data into db table");
     }
     println!(
         "Data loaded successfully from '{}' into table '{}'.",
